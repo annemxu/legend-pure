@@ -45,6 +45,7 @@ function meta::protocols::pure::v1_18_0::invocation::execution::execute::process
 
 function meta::protocols::pure::v1_18_0::transformation::fromPureGraph::context::transformContext(context:ExecutionContext[1], extensions:	meta::pure::router::extension::RouterExtension[*]):meta::protocols::pure::v1_18_0::metamodel::ExecutionContext[1]
 {
+  println('qws: transforming some context time'); 
    $context->match($extensions.serializerExtension('v1_18_0')->cast(@meta::protocols::pure::v1_18_0::extension::SerializerExtension_v1_18_0).invocation_execution_transformContext->concatenate([
       a:meta::pure::runtime::ExecutionContext[1]|
          ^meta::protocols::pure::v1_18_0::metamodel::ExecutionContext
@@ -59,6 +60,7 @@ function meta::protocols::pure::v1_18_0::transformation::fromPureGraph::context:
 
 function meta::protocols::pure::v1_18_0::invocation::execution::execute::generatePlan(json: String[1], host: String[1], port: Integer[1]):String[1]
 {
+  println('qws: generating plan things going on'); 
    let resp = executeHTTPRaw(
       ^URL(host = $host , port = $port, path = '/api/pure/v1/execution/generatePlan'),
       HTTPMethod.POST,
@@ -71,6 +73,7 @@ function meta::protocols::pure::v1_18_0::invocation::execution::execute::generat
 
 function meta::protocols::pure::v1_18_0::invocation::execution::execute::getPlanReturnType(planJSON:String[1]) : meta::protocols::pure::v1_18_0::metamodel::executionPlan::ResultType[1]
 {
+
    let rootExecNode = $planJSON->parseJSON()->cast(@JSONObject).keyValuePairs->filter(kv | $kv.key.value == 'rootExecutionNode').value;
    let retType = $rootExecNode->cast(@JSONObject).keyValuePairs->filter(kv | $kv.key.value == 'resultType').value->cast(@JSONObject)->toOne();
    if($retType->getValue('_type')->cast(@JSONString).value == 'partialClass',
@@ -95,6 +98,7 @@ function meta::protocols::pure::v1_18_0::invocation::execution::execute::execute
 
 function meta::protocols::pure::v1_18_0::invocation::execution::execute::executePlan(planJSON:String[1], host: String[1], port: Integer[1]) : String[1]
 {
+  println('qws: executingplan time'); 
    let resp = meta::pure::functions::io::http::executeHTTPRaw(
       ^URL(host = $host , port = $port, path = 'api/pure/v1/execution/executePlan'),
       HTTPMethod.POST,
@@ -107,6 +111,8 @@ function meta::protocols::pure::v1_18_0::invocation::execution::execute::execute
 
 function meta::protocols::pure::v1_18_0::invocation::execution::execute::buildExecutionInput<T|m>(f:FunctionDefinition<{->T[m]}>[1], m:Mapping[1], runtime:Runtime[1],  exeCtx:ExecutionContext[0..1], version:String[1], executionMode:String[1], extensions:meta::pure::router::extension::RouterExtension[*]):String[1]
 {
+
+  println('qws: time execution testing'); 
          let transformedContext = if($exeCtx->isNotEmpty(), | $exeCtx->toOne()->transformContext($extensions),| []);
          let execMode = ExecutionMode->extractEnumValue($executionMode);
 
@@ -156,6 +162,8 @@ function meta::protocols::pure::v1_18_0::invocation::execution::execute::alloyEx
    let transformedContext = if($context->isNotEmpty(), | $context->toOne()->transformContext($extensions),| []);
    let execMode = meta::protocols::pure::v1_18_0::invocation::execution::execute::ExecutionMode->extractEnumValue($executionMode);
    let mappings = $m->concatenate(getMappingsFromRuntime($pureRuntime));
+
+   println('qws: alloyexecuting time'); 
 
 
    // This choice is made as ExecutionContext information can affect the results computed by the executionPlan endpoint
@@ -219,6 +227,8 @@ function meta::protocols::pure::v1_18_0::invocation::execution::execute::alloyEx
 
 function meta::protocols::pure::v1_18_0::invocation::execution::execute::generatePlan<T|m>(f: FunctionDefinition<{->T[m]}>[1], m: Mapping[1], runtime: Runtime[1], exeCtx: ExecutionContext[0..1], host: String[1], port: Integer[1], version: String[1], executionMode: String[1], extensions:meta::pure::router::extension::RouterExtension[*]):String[1]
 {
+
+  println('qws: generating plan'); 
    let resultJSON = buildExecutionInput($f, $m, $runtime, $exeCtx, $version, $executionMode, $extensions);
    generatePlan($resultJSON, $host, $port);
 }
@@ -226,7 +236,6 @@ function meta::protocols::pure::v1_18_0::invocation::execution::execute::generat
 function meta::protocols::pure::v1_18_0::invocation::execution::execute::alloyExecuteLambda<T|m>(f:FunctionDefinition<{->T[m]}>[1], m:Mapping[1], pureRuntime:Runtime[1], context:ExecutionContext[0..1], host:String[1], port:Integer[1], version:String[1], executionMode:String[1], extensions:meta::pure::router::extension::RouterExtension[*]) : String[1]
 {
    let payload = buildExecutionInput($f,$m,$pureRuntime,$context,$version,$executionMode, $extensions);
-
    let resp = executeHTTPRaw(^URL(host = $host , port=$port, path = '/api/pure/'+$version+'/execution/execute'),
                                  HTTPMethod.POST,
                                  'application/json',

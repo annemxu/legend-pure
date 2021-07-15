@@ -548,6 +548,7 @@ Class meta::relational::tests::mapping::classMappingFilterWithInnerJoin::model::
 
 function meta::relational::tests::mapping::classMappingFilterWithInnerJoin::mapping::createTablesAndFillDb():Boolean[1]
 {
+  print('qwe: testing mapping');
 
    let connection = meta::relational::tests::testRuntime().connectionByElement(meta::relational::tests::db)->cast(@meta::relational::runtime::TestDatabaseConnection);
    meta::relational::tests::mapping::union::createTablesAndFillDb();

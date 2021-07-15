@@ -301,6 +301,8 @@ function meta::pure::tds::tdsRows(tds:TabularDataSet[1]):TDSRow[*]
 
 function meta::pure::tds::projectWithColumnSubset<T>(set:T[*], columnSpecifications:ColumnSpecification<T>[*], columnList:String[*]):TabularDataSet[1]
 {  
+  print('qwerty:testing');
+  print($columnSpecifications.name);
    $columnList->map( i| assert($columnSpecifications.name->contains($i) , 'SubSetColumnList should be in project List '  ) );
    $set->project($columnSpecifications->filter(c|$c.name->in($columnList)));
 }

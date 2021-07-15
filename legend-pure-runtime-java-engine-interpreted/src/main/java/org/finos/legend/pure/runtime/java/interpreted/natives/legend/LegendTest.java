@@ -27,6 +27,7 @@ import org.finos.legend.pure.m3.navigation.ProcessorSupport;
 import org.finos.legend.pure.m3.navigation.ValueSpecificationBootstrap;
 import org.finos.legend.pure.m4.ModelRepository;
 import org.finos.legend.pure.m4.coreinstance.CoreInstance;
+//import org.finos.legend.pure.m4.logs.PureLogger;
 import org.finos.legend.pure.runtime.java.interpreted.ExecutionSupport;
 import org.finos.legend.pure.runtime.java.interpreted.FunctionExecutionInterpreted;
 import org.finos.legend.pure.runtime.java.interpreted.VariableContext;
@@ -35,29 +36,40 @@ import org.finos.legend.pure.runtime.java.interpreted.natives.core.NativeFunctio
 import org.finos.legend.pure.runtime.java.interpreted.profiler.Profiler;
 
 import java.util.Stack;
+import java.util.logging.Logger;
 
 public class LegendTest extends NativeFunction
 {
     private final FunctionExecutionInterpreted functionExecution;
     private final ModelRepository repository;
+    private static final Logger logger = Logger.getLogger(String.valueOf(LegendTest.class));
+
 
     public LegendTest(ModelRepository repository, FunctionExecutionInterpreted functionExecution)
     {
         this.functionExecution = functionExecution;
         this.repository = repository;
+
+
     }
 
     @Override
     public CoreInstance execute(ListIterable<? extends CoreInstance> params, Stack<MutableMap<String, CoreInstance>> resolvedTypeParameters, Stack<MutableMap<String, CoreInstance>> resolvedMultiplicityParameters, VariableContext variableContext, CoreInstance functionExpressionToUseInStack, Profiler profiler, InstantiationContext instantiationContext, ExecutionSupport executionSupport, Context context, final ProcessorSupport processorSupport) throws PureExecutionException
     {
+//        logger.log("qwerty:testing execute");
+        logger.info("qwerty:testing execute");
         String clientVersion = System.getProperty("legend.test.clientVersion");
         String serverVersion = System.getProperty("legend.test.serverVersion");
         String serializationKind = System.getProperty("legend.test.serializationKind");
+        System.out.println("qwerty: serializationKind" + serializationKind);
+        System.out.println("qwerty: serverVersion" + serverVersion);
+
         String host = System.getProperty("legend.test.server.host");
         int port = System.getProperty("legend.test.server.port") == null ? -1 : Integer.parseInt(System.getProperty("legend.test.server.port"));
 
         if (host != null)
         {
+//            System.out.println("hey not null qwerty");
             if (port == -1)
             {
                 throw new PureExecutionException(functionExpressionToUseInStack.getSourceInformation(), "The system variable 'legend.test.server.host' is set to '"+host+"' however 'legend.test.server.port' has not been set!");
@@ -81,6 +93,7 @@ public class LegendTest extends NativeFunction
                     ValueSpecificationBootstrap.newStringLiteral(this.repository, host, this.functionExecution.getProcessorSupport()),
                     ValueSpecificationBootstrap.newIntegerLiteral(this.repository, port, this.functionExecution.getProcessorSupport()));
 
+            //this importnat aloy execution thing qwerty
             return this.functionExecution.executeFunctionExecuteParams(FunctionCoreInstanceWrapper.toFunction(Instance.getValueForMetaPropertyToOneResolved(params.get(0), M3Properties.values, processorSupport)),
                     fParams,
                     resolvedTypeParameters,

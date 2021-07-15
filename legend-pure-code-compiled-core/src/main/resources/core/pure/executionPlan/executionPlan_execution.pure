@@ -23,6 +23,8 @@ import meta::pure::deepfetch::builder::*;
 
 function meta::pure::executionPlan::execute(plan:ExecutionPlan[1], parametersValues:Any[*], extensions:meta::pure::router::extension::RouterExtension[*]):Result<Any|*>[1]
 {
+
+  println('qwe:ult execute');
    let parameters = $plan.func->functionType().parameters->evaluateAndDeactivate();
    validateParams($plan.func->functionType().parameters->evaluateAndDeactivate(), $parametersValues);
    $plan.rootExecutionNode->processNode($plan.mapping, $plan.runtime, zip($parameters, $parametersValues), $extensions);

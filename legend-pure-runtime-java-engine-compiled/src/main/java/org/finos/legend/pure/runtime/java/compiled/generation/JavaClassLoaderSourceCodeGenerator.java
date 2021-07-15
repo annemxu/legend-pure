@@ -31,6 +31,7 @@ import org.finos.legend.pure.runtime.java.compiled.extension.CompiledExtension;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 /**
  * Generates java source code from the class path
@@ -39,6 +40,8 @@ public class JavaClassLoaderSourceCodeGenerator
 {
     public static void main(String[] args) throws Exception
     {
+
+        System.out.println("qwerty: you must run :,) ");
         MutableList<CompiledExtension> extensions = 1 < args.length && args[1] != null ? ArrayAdapter.adapt(args[1].split(",")).collect(new CheckedFunction<String, CompiledExtension>(){
             @Override
             public CompiledExtension safeValueOf(String v) throws Exception
