@@ -57,6 +57,7 @@ public class Evaluate extends NativeFunction
     @Override
     public CoreInstance execute(ListIterable<? extends CoreInstance> params, Stack<MutableMap<String, CoreInstance>> resolvedTypeParameters, Stack<MutableMap<String, CoreInstance>> resolvedMultiplicityParameters, VariableContext variableContext, CoreInstance functionExpressionToUseInStack, Profiler profiler, InstantiationContext instantiationContext, ExecutionSupport executionSupport, Context context, ProcessorSupport processorSupport) throws PureExecutionException
     {
+//        System.out.print("qwertyult evaluating, ");
         if (Instance.instanceOf(Instance.getValueForMetaPropertyToOneResolved(params.get(0), M3Properties.values, processorSupport), M3Paths.Nil, processorSupport))
         {
             throw new PureExecutionException(functionExpressionToUseInStack.getSourceInformation(), "Evaluate can't take an instance of Nil as a function");

@@ -12,5 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-native function meta::legend::test::mayExecuteLegendTest<X|k>(f1:meta::pure::metamodel::function::Function<{String[1], String[1], String[1], String[1], Integer[1]->X[k]}>[1],
+native function meta::legend::test::mayExecuteLegendTest<X|k>(f1:meta::pure::metamodel::function::Function<{String[1], String[1], String[1], String[1], Integer[1], String[1]->X[k]}>[1],
                                                               f2:meta::pure::metamodel::function::Function<{->X[k]}>[1]):X[k];
+
+//native function meta::legend::test::mayExecuteLegendTest<X|k>(f1:meta::pure::metamodel::function::Function<{String[1], String[1], String[1], String[1], Integer[1]->X[k]}>[1],
+  //                                                            f2:meta::pure::metamodel::function::Function<{String[1], String[1], String[1], String[1], Integer[1], String[1]->X[k]}>[1],
+    //                                                          f3:meta::pure::metamodel::function::Function<{->X[k]}>[1]):X[k];

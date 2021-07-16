@@ -56,26 +56,31 @@ public class LegendTest extends NativeFunction
     @Override
     public CoreInstance execute(ListIterable<? extends CoreInstance> params, Stack<MutableMap<String, CoreInstance>> resolvedTypeParameters, Stack<MutableMap<String, CoreInstance>> resolvedMultiplicityParameters, VariableContext variableContext, CoreInstance functionExpressionToUseInStack, Profiler profiler, InstantiationContext instantiationContext, ExecutionSupport executionSupport, Context context, final ProcessorSupport processorSupport) throws PureExecutionException
     {
-//        logger.log("qwerty:testing execute");
-        logger.info("qwerty:testing execute");
+        logger.info("qwerty: testing execute");
         String clientVersion = System.getProperty("legend.test.clientVersion");
         String serverVersion = System.getProperty("legend.test.serverVersion");
         String serializationKind = System.getProperty("legend.test.serializationKind");
-        System.out.println("qwerty: serializationKind" + serializationKind);
-        System.out.println("qwerty: serverVersion" + serverVersion);
+        String databaseType = System.getProperty("legend.test.databaseType");
+
+        System.out.println("qwerty: databaseType - " + databaseType);
 
         String host = System.getProperty("legend.test.server.host");
         int port = System.getProperty("legend.test.server.port") == null ? -1 : Integer.parseInt(System.getProperty("legend.test.server.port"));
 
         if (host != null)
         {
-//            System.out.println("hey not null qwerty");
             if (port == -1)
             {
                 throw new PureExecutionException(functionExpressionToUseInStack.getSourceInformation(), "The system variable 'legend.test.server.host' is set to '"+host+"' however 'legend.test.server.port' has not been set!");
             }
+            if (databaseType == null || databaseType.equals("h2defaulttest"))
+            {
+                logger.info("qwerty: database type was null going to set to h2defaulttest");
+                databaseType="h2defaulttest";
+            }
             if (serializationKind == null || !(serializationKind.equals("text") || serializationKind.equals("json")))
             {
+                //qwerty changes likeso
                 serializationKind="json";
             }
             if (clientVersion == null)
@@ -91,9 +96,12 @@ public class LegendTest extends NativeFunction
                     ValueSpecificationBootstrap.newStringLiteral(this.repository, serverVersion, this.functionExecution.getProcessorSupport()),
                     ValueSpecificationBootstrap.newStringLiteral(this.repository, serializationKind, this.functionExecution.getProcessorSupport()),
                     ValueSpecificationBootstrap.newStringLiteral(this.repository, host, this.functionExecution.getProcessorSupport()),
-                    ValueSpecificationBootstrap.newIntegerLiteral(this.repository, port, this.functionExecution.getProcessorSupport()));
+                    ValueSpecificationBootstrap.newIntegerLiteral(this.repository, port, this.functionExecution.getProcessorSupport()),
+                    ValueSpecificationBootstrap.newStringLiteral(this.repository, databaseType, this.functionExecution.getProcessorSupport())
+            );
 
-            //this importnat aloy execution thing qwerty
+            logger.info("test database type is " + databaseType + ", returning alloy executioning");
+
             return this.functionExecution.executeFunctionExecuteParams(FunctionCoreInstanceWrapper.toFunction(Instance.getValueForMetaPropertyToOneResolved(params.get(0), M3Properties.values, processorSupport)),
                     fParams,
                     resolvedTypeParameters,
@@ -106,6 +114,9 @@ public class LegendTest extends NativeFunction
         }
         else
         {
+            logger.info("qwerty: function alloy executioning part 2");
+
+
             return this.functionExecution.executeFunctionExecuteParams(FunctionCoreInstanceWrapper.toFunction(Instance.getValueForMetaPropertyToOneResolved(params.get(1), M3Properties.values, processorSupport)),
                     FastList.<CoreInstance>newList(),
                     resolvedTypeParameters,

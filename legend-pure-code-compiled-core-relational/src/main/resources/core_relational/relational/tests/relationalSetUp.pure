@@ -892,12 +892,13 @@ import meta::relational::runtime::*;
 
 function meta::relational::tests::testRuntime():Runtime[1]
 {
-   print('Qwerty: yeehaw runtime');
+   print('Qwerty: runtiming happening');
    testRuntime(db);
 }
 
 function meta::relational::tests::testRuntimeForBQ():Runtime[1]
 {
+   print('Qwerty: BQ Running happening');
    testRuntime(dbForBQ);
 }
 
@@ -908,8 +909,18 @@ function meta::relational::tests::testRuntime(timeZone:String[1]):Runtime[1]
 
 function meta::relational::tests::testRuntime(db:Database[1]):Runtime[1]
 {
-   testRuntime(testDatabaseConnection($db, []))
+  //  testRuntime(testDatabaseConnection($db, []), testRedshiftConnection($db, [] ))
+     testRuntime(testDatabaseConnection($db, []))
+
 }
+
+// function <<access.private>> meta::relational::tests::testRuntime(testConnection:TestDatabaseConnection[1], testConnection2:TestDatabaseConnection[1]):Runtime[1]
+// {
+
+//    let hm = [$testConnection, $testConnection2];
+//    print($hm);
+//    ^Runtime(connections = [$testConnection, $testConnection2]);
+// }
 
 function <<access.private>> meta::relational::tests::testRuntime(testConnection:TestDatabaseConnection[1]):Runtime[1]
 {
@@ -919,13 +930,27 @@ function <<access.private>> meta::relational::tests::testRuntime(testConnection:
 
 function <<access.private>> meta::relational::tests::testDatabaseConnection(db:Database[1], timeZone:String[0..1]):TestDatabaseConnection[1]
 {
-  println('qwe: hardcoding type = databasetype.h2');
+  println('qweult:testDatabaseConnectionH2-');
     ^TestDatabaseConnection(
         element = $db,
         type = DatabaseType.H2,
+        // type = DatabaseType.Snowflake,
         timeZone = if($timeZone->isEmpty(), |'GMT', |$timeZone)
     );
 }    
+ 
+
+ function <<access.private>> meta::relational::tests::testRedshiftConnection(db:Database[1], timeZone:String[0..1]):TestDatabaseConnection[1]
+{
+  println('qweult:testDatabaseConnectionH2-');
+    ^TestDatabaseConnection(
+        element = $db,
+        // type = DatabaseType.H2,
+        type = DatabaseType.Redshift,
+        timeZone = if($timeZone->isEmpty(), |'GMT', |$timeZone)
+    );
+}    
+ 
 
 
 function meta::relational::tests::createPersonTableAndFillDb(connection : DatabaseConnection[1]) : Boolean[1]
@@ -999,7 +1024,7 @@ function meta::relational::tests::createProductSchemaTablesAndFillDb(connection 
 
 function meta::relational::tests::createTablesAndFillDb():Boolean[1]
 {
-  println('qwe: creating tables and fill db');
+  println('qwertynow: creating tables and fill db');
    let connection = testRuntime().connectionByElement(db)->cast(@TestDatabaseConnection);
 
    executeInDb('Drop table if exists PersonNameParameter;', $connection);

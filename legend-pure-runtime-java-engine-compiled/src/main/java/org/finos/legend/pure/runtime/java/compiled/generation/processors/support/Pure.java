@@ -172,6 +172,10 @@ public class Pure
         String clientVersion = System.getProperty("legend.test.clientVersion");
         String serverVersion = System.getProperty("legend.test.serverVersion");
         String serializationKind = System.getProperty("legend.test.serializationKind");
+        String databaseType = System.getProperty("legend.test.databaseType");
+
+        //qwertyultimate note
+
         if (host != null)
         {
             if (port == -1)
@@ -191,7 +195,7 @@ public class Pure
                 throw new PureExecutionException("The system variable 'legend.test.serverVersion' should be set");
             }
         }
-        return host != null ? evaluate(es, alloyTest, bridge, clientVersion, serverVersion, serializationKind, host, port) : evaluate(es, regular, bridge);
+        return host != null ? evaluate(es, alloyTest, bridge, clientVersion, serverVersion, serializationKind, host, port, databaseType) : evaluate(es, regular, bridge);
     }
 
     public static <E> E getEnumByName(Enumeration<E> enumeration, final String name)

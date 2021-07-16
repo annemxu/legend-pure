@@ -22,6 +22,8 @@ import meta::protocols::pure::vX_X_X::transformation::fromPureGraph::context::*;
 import meta::pure::runtime::*;
 import meta::json::*;
 
+import meta::relational::runtime::*;
+
 
 Enum meta::protocols::pure::vX_X_X::invocation::execution::execute::ExecutionMode
 {
@@ -154,16 +156,19 @@ function meta::protocols::pure::vX_X_X::invocation::execution::execute::buildExe
          )->alloyToJSON();
 }
 
-function meta::protocols::pure::vX_X_X::invocation::execution::execute::alloyExecute<T|m>(f:FunctionDefinition<{->T[m]}>[1], m:Mapping[1], pureRuntime:Runtime[1], context:ExecutionContext[0..1], host:String[1], port:Integer[1], version:String[1], executionMode:String[1], extensions:meta::pure::router::extension::RouterExtension[*]):meta::pure::mapping::Result<T|m>[1]
+//qwertyultimate
+function meta::protocols::pure::vX_X_X::invocation::execution::execute::alloyExecute<T|m>(f:FunctionDefinition<{->T[m]}>[1], m:Mapping[1], pureRuntime:Runtime[1], databaseType:String[1],  context:ExecutionContext[0..1], host:String[1], port:Integer[1], version:String[1], executionMode:String[1], extensions:meta::pure::router::extension::RouterExtension[*]):meta::pure::mapping::Result<T|m>[1]
 {
-  legendExecute($f, $m, $pureRuntime, $context, $host, $port, $version, 'json', $executionMode, $extensions);
+  legendExecute($f, $m, $pureRuntime, $databaseType, $context, $host, $port, $version, 'json', $executionMode, $extensions);
 }
 
-function meta::protocols::pure::vX_X_X::invocation::execution::execute::legendExecute<T|m>(f:FunctionDefinition<{->T[m]}>[1], m:Mapping[1], pureRuntime:Runtime[1], context:ExecutionContext[0..1], host:String[1], port:Integer[1], version:String[1], serializationKind:String[1], executionMode:String[1], extensions:meta::pure::router::extension::RouterExtension[*]):meta::pure::mapping::Result<T|m>[1]
+function meta::protocols::pure::vX_X_X::invocation::execution::execute::legendExecute<T|m>(f:FunctionDefinition<{->T[m]}>[1], m:Mapping[1], pureRuntime:Runtime[1], databaseType:String[1],  context:ExecutionContext[0..1], host:String[1], port:Integer[1], version:String[1], serializationKind:String[1], executionMode:String[1], extensions:meta::pure::router::extension::RouterExtension[*]):meta::pure::mapping::Result<T|m>[1]
 {
    let transformedContext = if($context->isNotEmpty(), | $context->toOne()->transformContext($extensions),| []);
    let execMode = meta::protocols::pure::vX_X_X::invocation::execution::execute::ExecutionMode->extractEnumValue($executionMode);
    let mappings = $m->concatenate(getMappingsFromRuntime($pureRuntime));
+
+   println('qwerty: appearing in execution.pure - ' + $databaseType);
 
 
    // This choice is made as ExecutionContext information can affect the results computed by the executionPlan endpoint
@@ -187,7 +192,7 @@ function meta::protocols::pure::vX_X_X::invocation::execution::execute::legendEx
         let result = $planGenerated->executePlan($host, $port);
         ^Pair<Any,Any>(first=$resultType,second=$result);,
 
-      |  let alloyExecuteResult = alloyExecuteLambda($f,$m,$pureRuntime, $context, $host, $port, $version, $serializationKind, $executionMode, $extensions);
+      |  let alloyExecuteResult = alloyExecuteLambda($f,$m,$pureRuntime, $databaseType, $context, $host, $port, $version, $serializationKind, $executionMode, $extensions);
          let retGenericType = $f.expressionSequence->evaluateAndDeactivate()->last()->toOne().genericType;
          let retType = $retGenericType.rawType->toOne();
          ^Pair<Any,Any>(first=$retType,second=$alloyExecuteResult);
@@ -233,8 +238,12 @@ function meta::protocols::pure::vX_X_X::invocation::execution::execute::generate
    generatePlan($resultJSON, $host, $port);
 }
 
-function meta::protocols::pure::vX_X_X::invocation::execution::execute::alloyExecuteLambda<T|m>(f:FunctionDefinition<{->T[m]}>[1], m:Mapping[1], pureRuntime:Runtime[1], context:ExecutionContext[0..1], host:String[1], port:Integer[1], version:String[1], serializationKind:String[1], executionMode:String[1], extensions:meta::pure::router::extension::RouterExtension[*]) : String[1]
+function meta::protocols::pure::vX_X_X::invocation::execution::execute::alloyExecuteLambda<T|m>(f:FunctionDefinition<{->T[m]}>[1], m:Mapping[1], pureRuntime:Runtime[1], databaseType:String[1], context:ExecutionContext[0..1], host:String[1], port:Integer[1], version:String[1], serializationKind:String[1], executionMode:String[1], extensions:meta::pure::router::extension::RouterExtension[*]) : String[1]
 {
+
+print('qwerty: aloyexecutelambda with ');
+print($pureRuntime.connections->at(0)->cast(@DatabaseConnection).type.name);
+println('');
    let payload = buildExecutionInput($f,$m,$pureRuntime,$context,$version, $serializationKind, $executionMode, $extensions);
 
    let resp = executeHTTPRaw(^URL(host = $host , port=$port, path = '/api/pure/'+$version+'/execution/execute'),
@@ -243,6 +252,8 @@ function meta::protocols::pure::vX_X_X::invocation::execution::execute::alloyExe
                                  $payload
                               );
 
+
+   
    assertEq(200, $resp.statusCode, | $resp.statusCode->toString()+' \''+$resp.entity+'\'');
    $resp.entity;
 }
