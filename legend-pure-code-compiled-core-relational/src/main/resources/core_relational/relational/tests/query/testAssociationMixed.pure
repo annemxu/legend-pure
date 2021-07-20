@@ -34,7 +34,10 @@ function <<test.Test>> meta::relational::tests::query::association::mixed::testA
 
 function <<test.Test>> meta::relational::tests::query::association::mixed::testAssociationMixedDeep():Boolean[1]
 {
-   let result = execute(|Person.all()->filter(p | $p.firm.employees->exists(e | $e.address.name == 'Hong Kong')), simpleRelationalMapping, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
+
+    //  let result = execute(|Person.all(), simpldefaultRelationalExtensions(),debug()eRelationalMapping, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
+   let result = execute(|Person.all()->filter(p | $p.firm.employees->exists(e | $e.address.name == 'Hong Kong')), simpleRelationalMapping, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions(),debug());
+
    println($result.values.firstName);
    assertSize($result.values->removeDuplicates(), 2);
    assertEquals('Elena,Oliver', $result.values->removeDuplicates().firstName->sort()->makeString(','));

@@ -136,7 +136,7 @@ function meta::relational::tests::milestoning::initDatabase():Runtime[1]
    executeInDb('insert into ProductSynonymTable values(2, \'ProductName2\',\'GS-Mod-S3\',\'CUSIP\',\'smith\',\'2015-10-17 00:00:00\',\'9999-12-31 00:00:00\');',$connection);
    
    executeInDb('drop table if exists ProductClassificationTable;',$connection);
-   executeInDb('create table ProductClassificationTable (type VARCHAR(200),type_description VARCHAR(400),system VARCHAR(200), exchange VARCHAR(200), from_z TIMESTAMP, thru_z TIMESTAMP);',$connection);
+   executeInDb('create table ProductClassificationTable (type VARCHAR(200),type_description VARCHAR(400),"system" VARCHAR(200), exchange VARCHAR(200), from_z TIMESTAMP, thru_z TIMESTAMP);',$connection);
    executeInDb('insert into ProductClassificationTable values(\'STOCK\',\'STOCK DESC-V1\',\'SYS1\', \'LNSE\', \'2015-8-15 00:00:00\', \'2015-8-17 00:00:00\');',$connection);
    executeInDb('insert into ProductClassificationTable values(\'STOCK\',\'STOCK DESC-V2\',\'SYS1\', \'LNSE\', \'2015-8-17 00:00:00\',\'2015-9-15 00:00:00\');',$connection);
    executeInDb('insert into ProductClassificationTable values(\'STOCK\',\'STOCK DESC-V3\',\'SYS1\', \'LNSE\', \'2015-9-15 00:00:00\',\'2015-10-17 00:00:00\');',$connection);
@@ -152,7 +152,7 @@ function meta::relational::tests::milestoning::initDatabase():Runtime[1]
    executeInDb('insert into ProductClassificationTableWithBusinessSnapshotMilestoning values(\'OPTION\', \'OPTION DESC-V1\', \'2015-1-15\');', $connection);
 
    executeInDb('drop table if exists ProductClassificationTableNoMilestoning;',$connection);
-   executeInDb('create table ProductClassificationTableNoMilestoning (type VARCHAR(200),type_description VARCHAR(400),system VARCHAR(200), exchange VARCHAR(200));',$connection);
+   executeInDb('create table ProductClassificationTableNoMilestoning (type VARCHAR(200),type_description VARCHAR(400),"system" VARCHAR(200), exchange VARCHAR(200));',$connection);
    executeInDb('insert into ProductClassificationTableNoMilestoning values(\'STOCK\',\'STOCK DESC-V1\',\'SYS1\', \'LNSE\');',$connection);
    executeInDb('insert into ProductClassificationTableNoMilestoning values(\'STOCK\',\'STOCK DESC-V2\',\'SYS1\', \'LNSE\');',$connection);
    executeInDb('insert into ProductClassificationTableNoMilestoning values(\'STOCK\',\'STOCK DESC-V3\',\'SYS1\', \'LNSE\');',$connection);
@@ -160,7 +160,7 @@ function meta::relational::tests::milestoning::initDatabase():Runtime[1]
    executeInDb('insert into ProductClassificationTableNoMilestoning values(\'OPTION\',\'OPTION DESC-V1\',\'SYS1\', \'ISE\');',$connection);
    
    executeInDb('drop table if exists BiTemporalProductClassificationTable;',$connection);
-   executeInDb('create table BiTemporalProductClassificationTable (type VARCHAR(200),type_description VARCHAR(400),system VARCHAR(200), exchange VARCHAR(200), in_z TIMESTAMP, out_z TIMESTAMP, from_z TIMESTAMP, thru_z TIMESTAMP);',$connection);
+   executeInDb('create table BiTemporalProductClassificationTable (type VARCHAR(200),type_description VARCHAR(400),"system" VARCHAR(200), exchange VARCHAR(200), in_z TIMESTAMP, out_z TIMESTAMP, from_z TIMESTAMP, thru_z TIMESTAMP);',$connection);
    executeInDb('insert into BiTemporalProductClassificationTable values(\'STOCK\',\'STOCK DESC-V1\',\'SYS1\', \'LNSE\', \'2017-6-11 00:00:00\', \'9999-12-31 00:00:00\', \'2017-6-10 00:00:00\', \'9999-12-31 00:00:00\');',$connection);
 
    executeInDb('drop table if exists BiTemporalProductClassificationTableWithBusinessMilestoning;', $connection);
@@ -188,7 +188,7 @@ function meta::relational::tests::milestoning::initDatabase():Runtime[1]
    executeInDb('insert into BiTemporalProductClassificationTableWithNoMilestoning values(\'OPTION\', \'OPTION DESC-V1\');', $connection);
    
    executeInDb('drop table if exists BiTemporalProductClassificationTableWithLatest;',$connection);
-   executeInDb('create table BiTemporalProductClassificationTableWithLatest (type VARCHAR(200),type_description VARCHAR(400),system VARCHAR(200), exchange VARCHAR(200), in_z TIMESTAMP, out_z TIMESTAMP, from_z TIMESTAMP, thru_z TIMESTAMP);',$connection);
+   executeInDb('create table BiTemporalProductClassificationTableWithLatest (type VARCHAR(200),type_description VARCHAR(400),"system" VARCHAR(200), exchange VARCHAR(200), in_z TIMESTAMP, out_z TIMESTAMP, from_z TIMESTAMP, thru_z TIMESTAMP);',$connection);
    executeInDb('insert into BiTemporalProductClassificationTableWithLatest values(\'STOCK\',\'STOCK DESC-V1\',\'SYS1\', \'LNSE\', \'2017-6-11 00:00:00\', \'9999-12-31\', \'2017-6-10 00:00:00\', \'9999-12-31\');',$connection);
    
    executeInDb('drop table if exists ProductClassificationSystemTable;',$connection);

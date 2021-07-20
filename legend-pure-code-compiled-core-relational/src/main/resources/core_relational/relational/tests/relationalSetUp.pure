@@ -227,6 +227,15 @@ Database meta::relational::tests::dbForBQ
    Join Person_Person(personTable.key = {target}.key)
 )
 
+// ###Relational
+// Database meta::relational::tests::dbForRedshift
+// (
+//    Table Demo (
+//   PersonID int,
+//   City varchar (255)
+// )
+// )
+
 ###Relational
 Database meta::relational::tests::caseSensitiveTableNames
 (
@@ -893,7 +902,7 @@ import meta::relational::runtime::*;
 function meta::relational::tests::testRuntime():Runtime[1]
 {
    print('Qwerty: runtiming happening');
-   testRuntime(db);
+   testRuntime(db); 
 }
 
 function meta::relational::tests::testRuntimeForBQ():Runtime[1]
@@ -909,7 +918,6 @@ function meta::relational::tests::testRuntime(timeZone:String[1]):Runtime[1]
 
 function meta::relational::tests::testRuntime(db:Database[1]):Runtime[1]
 {
-  //  testRuntime(testDatabaseConnection($db, []), testRedshiftConnection($db, [] ))
      testRuntime(testDatabaseConnection($db, []))
 
 }
@@ -930,22 +938,22 @@ function <<access.private>> meta::relational::tests::testRuntime(testConnection:
 
 function <<access.private>> meta::relational::tests::testDatabaseConnection(db:Database[1], timeZone:String[0..1]):TestDatabaseConnection[1]
 {
-  println('qweult:testDatabaseConnectionH2-');
-    ^TestDatabaseConnection(
+    println('qweult:testDatabaseConnectionreddddshift-');
+
+    ^TestDatabaseConnection(    
         element = $db,
         type = DatabaseType.H2,
-        // type = DatabaseType.Snowflake,
         timeZone = if($timeZone->isEmpty(), |'GMT', |$timeZone)
     );
+   
 }    
  
 
  function <<access.private>> meta::relational::tests::testRedshiftConnection(db:Database[1], timeZone:String[0..1]):TestDatabaseConnection[1]
 {
-  println('qweult:testDatabaseConnectionH2-');
+  println('qweult:testDatabaseConnectionredshift-');
     ^TestDatabaseConnection(
         element = $db,
-        // type = DatabaseType.H2,
         type = DatabaseType.Redshift,
         timeZone = if($timeZone->isEmpty(), |'GMT', |$timeZone)
     );
@@ -955,16 +963,17 @@ function <<access.private>> meta::relational::tests::testDatabaseConnection(db:D
 
 function meta::relational::tests::createPersonTableAndFillDb(connection : DatabaseConnection[1]) : Boolean[1]
 {
+  
 
-   executeInDb('Drop table if exists PersonTable;', $connection);
-   executeInDb('Create Table PersonTable(id INT, firstName VARCHAR(200), lastName VARCHAR(200), age INT, addressId INT, firmId INT, managerId INT);', $connection);
-   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (1, \'Peter\', \'Smith\',23, 1,1,2);', $connection);
-   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (2, \'John\', \'Johnson\',22, 2,1,4);', $connection);
-   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (3, \'John\', \'Hill\',12, 3,1,2);', $connection);
-   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (4, \'Anthony\', \'Allen\',22, 4,1,null);', $connection);
-   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (5, \'Fabrice\', \'Roberts\',34, 5,2,null);', $connection);
-   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (6, \'Oliver\', \'Hill\',32, 6,3,null);', $connection);
-   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (7, \'David\', \'Harris\',35, 7,4,null);', $connection);
+   executeInDb('Drop table if exists persontable;', $connection);
+   executeInDb('Create Table persontable(id INT, firstName VARCHAR(200), lastName VARCHAR(200), age INT, addressId INT, firmId INT, managerId INT);', $connection);
+   executeInDb('insert into persontable (id, firstName, lastName, age, addressId, firmId, managerId) values (1, \'Peter\', \'Smith\',23, 1,1,2);', $connection);
+   executeInDb('insert into persontable (id, firstName, lastName, age, addressId, firmId, managerId) values (2, \'John\', \'Johnson\',22, 2,1,4);', $connection);
+   executeInDb('insert into persontable (id, firstName, lastName, age, addressId, firmId, managerId) values (3, \'John\', \'Hill\',12, 3,1,2);', $connection);
+   executeInDb('insert into persontable (id, firstName, lastName, age, addressId, firmId, managerId) values (4, \'Anthony\', \'Allen\',22, 4,1,null);', $connection);
+   executeInDb('insert into persontable (id, firstName, lastName, age, addressId, firmId, managerId) values (5, \'Fabrice\', \'Roberts\',34, 5,2,null);', $connection);
+   executeInDb('insert into persontable (id, firstName, lastName, age, addressId, firmId, managerId) values (6, \'Oliver\', \'Hill\',32, 6,3,null);', $connection);
+   executeInDb('insert into persontable (id, firstName, lastName, age, addressId, firmId, managerId) values (7, \'David\', \'Harris\',35, 7,4,null);', $connection);
    true;
 }
 
@@ -982,7 +991,11 @@ function meta::relational::tests::createFirmTableAndFillDb(connection : Database
 function meta::relational::tests::createTradeTableAndFillDb(connection : DatabaseConnection[1]) : Boolean[1]
 {
    executeInDb('Drop table if exists tradeTable;', $connection);
-   executeInDb('Create Table tradeTable(id INT, prodid INT, accountId INT, quantity FLOAT, tradeDate DATE, settlementDateTime TIMESTAMP(9));', $connection);
+   //Redshift cannot have (9)
+
+
+  executeInDb('Create Table tradeTable(id INT, prodid INT, accountId INT, quantity FLOAT, tradeDate DATE, settlementDateTime TIMESTAMP);', $connection);
+  //  executeInDb('Create Table tradeTable(id INT, prodid INT, accountId INT, quantity FLOAT, tradeDate DATE, settlementDateTime TIMESTAMP(9));', $connection);
    executeInDb('insert into tradeTable (id, prodid, accountId, quantity, tradeDate, settlementDateTime) values (1, 1, 1, 25, \'2014-12-01\', \'2014-12-02 21:00:00\');', $connection);
    executeInDb('insert into tradeTable (id, prodid, accountId, quantity, tradeDate, settlementDateTime) values (2, 1, 2, 320, \'2014-12-01\',\'2014-12-02 21:00:00\');', $connection);
    executeInDb('insert into tradeTable (id, prodid, accountId, quantity, tradeDate, settlementDateTime) values (3, 2, 1, 11, \'2014-12-01\', \'2014-12-02 21:00:00\');', $connection);
@@ -1024,12 +1037,24 @@ function meta::relational::tests::createProductSchemaTablesAndFillDb(connection 
 
 function meta::relational::tests::createTablesAndFillDb():Boolean[1]
 {
-  println('qwertynow: creating tables and fill db');
+  println('qwertynoww: poiuy creating tables and fill db');
    let connection = testRuntime().connectionByElement(db)->cast(@TestDatabaseConnection);
+
+   print($connection);
+
+  //  ^Runtime(connections = $testConnection)
+
+  
+println('qwerty persontable already exists relationalsetup.pure');
+
+   executeInDb('Drop table if exists AnneTableWork;', $connection);
+
+      executeInDb('Create Table AnneTableWork(id INT, lastNameFirst VARCHAR(200), title VARCHAR(200));', $connection);
 
    executeInDb('Drop table if exists PersonNameParameter;', $connection);
    executeInDb('Create Table PersonNameParameter(id INT, lastNameFirst VARCHAR(200), title VARCHAR(200));', $connection);
-   executeInDb('insert into PersonNameParameter (id, lastNameFirst, title) values (1, true, \'eee\');', $connection);
+   executeInDb('insert into PersonNameParameter (id, lastNameFirst, title) values (1, \'trie\', \'eee\');', $connection);
+  //  executeInDb('Create Table PersonNameParameter(id INT, lastNameFirst VARCHAR(200), title VARCHAR(200));', $connection);
 
    meta::relational::tests::createPersonTableAndFillDb($connection);
 
@@ -1125,7 +1150,10 @@ function meta::relational::tests::createTablesAndFillDb():Boolean[1]
    executeInDb('insert into accountTable (ID, name, createDate) values (2, \'Account 2\', \'2013-12-02\');', $connection);
 
    executeInDb('Drop table if exists orderTable;', $connection);
+
+   println('timestamping'); 
    executeInDb('Create Table orderTable(id INT, prodid INT, accountId INT, quantity FLOAT, orderDate DATE, settlementDateTime TIMESTAMP);', $connection);
+
    executeInDb('insert into orderTable (id, prodid, accountId, quantity, orderDate, settlementDateTime) values (1, 1, 1, 25, \'2014-12-01\', \'2014-12-02 21:00:00\');', $connection);
    executeInDb('insert into orderTable (id, prodid, accountId, quantity, orderDate, settlementDateTime) values (2, 1, 2, 320, \'2014-12-01\', \'2014-12-02 21:00:00\');', $connection);
    executeInDb('insert into orderTable (id, prodid, accountId, quantity, orderDate, settlementDateTime) values (3, 2, 1, 11, \'2014-12-01\', \'2014-12-02 21:00:00\');', $connection);

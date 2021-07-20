@@ -23,7 +23,9 @@ function <<test.BeforePackage>> meta::relational::tests::milestoning::bitemporal
 
 function <<test.Test>> meta::relational::tests::milestoning::bitemporal::testBiTemporalAllTypeQuery():Boolean[1]
 {
-  let result = execute(|BiTemporalProduct.all(%2017-6-10, %2017-6-9), milestoningmap, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
+    // let result = execute(|BiTemporalProduct.all(%2017-6-10, %2017-6-9), milestoningmap, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
+
+  let result = execute(|BiTemporalProduct.all(%2017-6-10, %2017-6-9), milestoningmap, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions(), noDebug());
   let products = $result.values;
   assertEquals(1, $products->size());
   assertEquals(%2017-6-10, $products->at(0).processingDate);

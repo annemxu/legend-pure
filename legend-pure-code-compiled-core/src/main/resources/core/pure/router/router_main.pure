@@ -285,6 +285,36 @@ function meta::pure::functions::collection::buildConcatenate(v:ValueSpecificatio
 }
 
 
+// function <<access.private>> meta::pure::router::execute<X|n>(rq:RoutingQuery<X|n>[1], m:Mapping[1], runtime:Runtime[1], exeCtx:ExecutionContext[1], extensions:meta::pure::router::extension::RouterExtension[*] ):Result<X|n>[1]
+// { 
+//    let routingStarted = now();
+//    let routed = $rq.fn->routeFunction($m, $runtime, $exeCtx, $extensions, );
+//    let routingElapsedTimeInNanoSecond = ($routingStarted->dateDiff(now(),DurationUnit.MILLISECONDS)) * 1000000;
+//    let routingActivity = ^meta::pure::mapping::RoutingActivity(routingTimeInNanoSecond = $routingElapsedTimeInNanoSecond);
+//    let deepFetchCache = if(!$rq.deepFetchTreeNode->isEmpty(),|createDeepFetchCache(),|[]);
+//    let results = $routed.functions->evaluateAndDeactivate()->fold({f:FunctionDefinition<Any>[1],a:Result<X|*>[1]|
+//                       let clusterVS = $f.expressionSequence->evaluateAndDeactivate()->cast(@ClusteredValueSpecification);
+//                       let res = $clusterVS->executeExpression($clusterVS->at(0).openVars, [], $rq.deepFetchTreeNode, $deepFetchCache, $exeCtx, $routed.advancedRouting, $extensions, $debug);
+//                       let values = if ($a.values->isEmpty(),
+//                                         |$res.values,
+//                                         |if($a.values->at(0)->instanceOf(TabularDataSet),
+//                                            |let one = $a.values->at(0)->cast(@TabularDataSet);
+//                                             ^$one(rows = $one.rows->concatenate($res.values->at(0)->cast(@TabularDataSet).rows));,
+//                                            |
+//                                             $a.values->concatenate($res.values)->removeDuplicates({a,b|$a->genericType().rawType == $b->genericType().rawType && $a->storeEquals($b, $extensions);});
+//                                            );
+//                                       )->cast(@X);
+//                       ^$a
+//                       (
+//                          values = $values,
+//                          activities += $res.activities
+//                       );
+//                  }, ^Result<X|*>());
+
+//     let resultsWithRoutingActivity = ^Result<X|n>(values=$results.values, activities=$results.activities->add($routingActivity));
+//     $extensions.logActivities->map(e|$e->eval($resultsWithRoutingActivity.activities));
+//     $resultsWithRoutingActivity;
+// }
 
 
 function <<access.private>> meta::pure::router::execute<X|n>(rq:RoutingQuery<X|n>[1], m:Mapping[1], runtime:Runtime[1], exeCtx:ExecutionContext[1], extensions:meta::pure::router::extension::RouterExtension[*], debug:DebugContext[1]):Result<X|n>[1]
