@@ -19,6 +19,9 @@ import meta::relational::tests::*;
 import meta::relational::functions::*;
 import meta::relational::functions::pureToSqlQuery::*;
 
+import meta::pure::runtime::*;
+import meta::relational::runtime::*;
+
 function <<test.BeforePackage>> meta::relational::tests::advanced::structure::setUp():Boolean[1]
 {
     createTablesAndFillDb();
@@ -72,9 +75,13 @@ function <<test.Test>> meta::relational::tests::advanced::structure::testQualifi
 
 function <<test.Test>> meta::relational::tests::advanced::structure::testQualifierQuery():Boolean[1]
 {
+
+  //QWERTYDELETE THIS 
+  let runtimeNew = ^Runtime(connections = ^TestDatabaseConnection(element = db, type = DatabaseType.Redshift )); 
+
    let result = execute(|Firm.all()->filter(f|$f.employeesByCityOrManagerAndLastName('Smith', 'Hoboken', 'Bla').firstName == 'Peter'),
                                              simpleRelationalMapping,
-                                             testRuntime()
+                                             $runtimeNew
                  , meta::pure::router::extension::defaultRelationalExtensions());
    assertSize($result.values->at(0), 1);
    assertEquals('Firm X', $result.values->at(0).legalName);

@@ -18,6 +18,7 @@ import meta::relational::runtime::*;
 import meta::relational::mapping::*;
 import meta::relational::tests::model::simple::*;
 import meta::relational::tests::*;
+import meta::pure::runtime::*;
 
 function <<test.Test>> meta::relational::tests::projection::view::testViewAllOneSimpleProperty():Boolean[1]
 {
@@ -25,6 +26,25 @@ function <<test.Test>> meta::relational::tests::projection::view::testViewAllOne
    assertSize($result.values.rows, 3);
    assertSameElements(['100.0,200.0,150.0'], $result.values.rows->map(r|$r.values)->makeString(','));
    assertEquals('select "root".pnl as "pnl" from (select distinct "root".ORDER_ID as ORDER_ID, "root".pnl as pnl, "accounttable_0".ID as accountId, "salespersontable_0".NAME as supportContact, "salespersontable_0".PERSON_ID as supportContactId from orderPnlTable as "root" left outer join orderTable as "ordertable_0" on ("root".ORDER_ID = "ordertable_0".ID) left outer join accountTable as "accounttable_0" on ("ordertable_0".accountID = "accounttable_0".ID) left outer join salesPersonTable as "salespersontable_0" on ("ordertable_0".accountID = "salespersontable_0".ACCOUNT_ID) where "root".pnl > 0) as "root"', $result->sqlRemoveFormatting());
+}
+
+function <<test.Test>> meta::relational::tests::projection::view::executejoinToViewDatabaseTest():Boolean[1]
+{
+  let databases = [DatabaseType.H2, DatabaseType.Redshift]; 
+  let testResults = $databases -> fold( 
+      { currDatabaseType, failed |   
+        let runtimeNew = ^Runtime(connections = ^TestDatabaseConnection(element = db, type = $currDatabaseType)); 
+        let result = execute(|Account.all()->project([a|$a.name, a|$a.orders.id, a|$a.orders.pnl],['accountName','tradeId','pnl']), simpleRelationalMapping, $runtimeNew, meta::pure::router::extension::defaultRelationalExtensions());
+        if ( $result.values.rows->map(r|$r.values->makeString(','))->makeString('~') == ['Acicount 1,1,100.0~Account 1,3,TDSNull~Account 2,2,200.0~Account 2,4,150.0'],
+          | 
+          println( $currDatabaseType.name + ' TEST PASSED' ); 
+          ,
+          | $failed -> add($currDatabaseType.name); 
+        );
+        } , []
+  );
+  println('New database failures : ');println($testResults); 
+  assert($testResults-> isEmpty() , 'TEST FAILED FOR ' + $testResults -> size()-> toString() + ' DATABASES (LISTED ABOVE).' ); 
 }
 
 function <<test.Test>> meta::relational::tests::projection::view::testJoinToView():Boolean[1]

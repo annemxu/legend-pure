@@ -1,0 +1,116 @@
+// Copyright 2021 Goldman Sachs
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+
+
+
+###Pure
+
+Class meta::relational::tests::databaseCoreTests::Product
+{
+   id : Integer[1];
+   name : String[1];
+   type : String[1];
+}
+
+###Relational
+
+Database meta::relational::tests::databaseCoreTests::ProductDatabase
+(
+   Table ProductTable(id INT PRIMARY KEY, name VARCHAR(20), type VARCHAR(20))
+)
+
+###Mapping
+import meta::relational::tests::databaseCoreTests::*;
+
+Mapping meta::relational::tests::databaseCoreTests::ProductMapping
+(
+   Product : Relational
+   {
+      id : [ProductDatabase]ProductTable.id,
+      name : [ProductDatabase]ProductTable.name,
+      type : [ProductDatabase]ProductTable.type
+   }
+)
+
+###Pure
+
+
+import meta::relational::metamodel::*;
+import meta::json::*;
+import meta::json::tests::*;
+import meta::relational::tests::*;
+import meta::pure::profiles::*;
+import meta::relational::metamodel::execute::*;
+import meta::pure::runtime::*;
+import meta::relational::runtime::*;
+
+import meta::relational::tests::databaseCoreTests::*;
+
+function meta::relational::tests::databaseCoreTests::concatenateTemporalTdsQueries(lfs:LambdaFunction<{->TabularDataSet[1]}>[*]):LambdaFunction<{->TabularDataSet[1]}>[1]
+{
+   let concat = ^SimpleFunctionExpression(func=concatenate_TabularDataSet_1__TabularDataSet_1__TabularDataSet_1_, multiplicity=ZeroOne, genericType=^GenericType(rawType=TabularDataSet), importGroup = system::imports::coreImport)->evaluateAndDeactivate();
+
+   let concatSfe = $lfs->fold({lf:LambdaFunction<{->TabularDataSet[1]}>[1], s:SimpleFunctionExpression[1]|  let fe = $lf.expressionSequence->at(0)->evaluateAndDeactivate()->cast(@ValueSpecification)->meta::relational::milestoning::reprocessValueSpecification($lf->openVariableValues())->cast(@SimpleFunctionExpression);
+                                                                                                            if($s.parametersValues->size() < 2 ,| ^$s(parametersValues+=$fe)
+                                                                                                                                               ,| ^$concat(parametersValues=[$s, $fe]);
+
+
+                                                                                                              );
+                              }, $concat);
+
+   let templateLambda = {|^TabularDataSet()};
+   ^$templateLambda(expressionSequence = $concatSfe);
+}
+
+function meta::relational::tests::databaseCoreTests::testConcatenationOfTdsQueries(dbType :DatabaseType[1]):Boolean[1]
+{
+   let lfs = [{|Product.all()->project([p|$p.id, p|$p.name, p|$p.type],['id', 'name', 'type'])},
+              {|Product.all()->project([p|$p.id, p|$p.name, p|$p.type],['id', 'name', 'type'])},
+              {|Product.all()->project([p|$p.id, p|$p.name, p|$p.type],['id', 'name', 'type'])}]->evaluateAndDeactivate();
+   
+
+   let runtimeNew = ^Runtime(connections = ^TestDatabaseConnection(element = db, type = $dbType)); 
+
+   let concatLambda = concatenateTemporalTdsQueries($lfs);
+   
+   let actualQuery = execute($concatLambda, ProductMapping, $runtimeNew, meta::pure::router::extension::defaultRelationalExtensions());
+   let actualResult = $actualQuery.values->at(0).rows->map(r|$r.values->makeString(','));
+   
+   let expectedQuery = 'select "unionalias_0"."id" as "id", "unionalias_0"."name" as "name", "unionalias_0"."type" as "type" from (select "root".id as "id", "root".name as "name", "root".type as "type" from ProductTable as "root" UNION ALL select "root".id as "id", "root".name as "name", "root".type as "type" from ProductTable as "root" UNION ALL select "root".id as "id", "root".name as "name", "root".type as "type" from ProductTable as "root") as "unionalias_0"';
+   let expectedResult = ['1,name1,type1', '2,name2,type2', '3,name3,type3', '4,name1,type1', '5,name2,type2', '1,name1,type1', '2,name2,type2', '3,name3,type3', '4,name1,type1', '5,name2,type2', '1,name1,type1', '2,name2,type2', '3,name3,type3', '4,name1,type1', '5,name2,type2'];
+   
+  //  assertSameSQL($expectedQuery, $actualQuery);
+   assertEquals($expectedResult, $actualResult);
+}
+
+function meta::relational::tests::databaseCoreTests::setUp(dbType :DatabaseType[1]):Boolean[1]
+{
+  //  let connection = testRuntime().connectionByElement(ProductDatabase)->cast(@TestDatabaseConnection);
+  let connection = ^TestDatabaseConnection(element = db, type = $dbType); 
+
+  //  dropAndCreateTableInDb(ProductDatabase, 'ProductTable', $connection);
+     executeInDb('Drop table if exists ProductTable;', $connection);
+  executeInDb('Create Table ProductTable(id INT PRIMARY KEY, name VARCHAR(20), type VARCHAR(20));', $connection);
+
+  //  Table ProductTable(id INT PRIMARY KEY, name VARCHAR(20), type VARCHAR(20))
+
+   executeInDb('insert into ProductTable (id, name, type) values (1,\'name1\', \'type1\');', $connection);
+   executeInDb('insert into ProductTable (id, name, type) values (2,\'name2\', \'type2\');', $connection);
+   executeInDb('insert into ProductTable (id, name, type) values (3,\'name3\', \'type3\');', $connection);
+   executeInDb('insert into ProductTable (id, name, type) values (4,\'name1\', \'type1\');', $connection);
+   executeInDb('insert into ProductTable (id, name, type) values (5,\'name2\', \'type2\');', $connection);
+   
+   true;
+}

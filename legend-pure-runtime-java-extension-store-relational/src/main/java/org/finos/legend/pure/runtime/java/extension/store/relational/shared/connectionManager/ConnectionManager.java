@@ -69,19 +69,49 @@ public class ConnectionManager
 
     private static final String TestDatabaseConnection = "meta::relational::runtime::TestDatabaseConnection";
     private static final TestDatabaseConnect testDatabaseConnect = new TestDatabaseConnect();
+    private static final TestRedshiftDatabaseConnect testRedshiftDatabaseConnect = new TestRedshiftDatabaseConnect();
 
+    //asdf
     private ConnectionManager()
     {
     }
 
     public static ConnectionWithDataSourceInfo getConnectionWithDataSourceInfo(CoreInstance connectionInformation, ProcessorSupport processorSupport)
     {
-        if (processorSupport.instance_instanceOf(connectionInformation, TestDatabaseConnection))
-        {
-            return testDatabaseConnect.getConnectionWithDataSourceInfo(IdentityManager.getAuthenticatedUserId());
-        }
 
-        throw new RuntimeException(connectionInformation + " is not supported for execution!!");
+//        System.out.println("Get connection with data source info qwerty");
+
+        //poiuy temp delete force redshift run
+//        if (processorSupport.instance_instanceOf(connectionInformation, TestDatabaseConnection))
+//        {
+//            return testRedshiftDatabaseConnect.getConnectionWithDataSourceInfo(IdentityManager.getAuthenticatedUserId());
+//        }
+//        throw new RuntimeException(connectionInformation + " is not supported for execution!!");
+
+
+        String databaseType = connectionInformation.getValueForMetaPropertyToOne("type").toString();
+        if (databaseType.startsWith("Redshift") ) {
+            System.out.println("Connection type is Redshift, connect to redshift cluster");
+            if (processorSupport.instance_instanceOf(connectionInformation, TestDatabaseConnection))
+            {
+                System.out.println("Processor support instance of connection information returning");
+                return testRedshiftDatabaseConnect.getConnectionWithDataSourceInfo(IdentityManager.getAuthenticatedUserId());
+            }
+            throw new RuntimeException(connectionInformation + " is not supported for execution!!");
+        }
+        else if (databaseType.startsWith("H2")) {
+            System.out.println("Connection type is H2, connect to H2");
+            if (processorSupport.instance_instanceOf(connectionInformation, TestDatabaseConnection))
+            {
+                return testDatabaseConnect.getConnectionWithDataSourceInfo(IdentityManager.getAuthenticatedUserId());
+            }
+            throw new RuntimeException(connectionInformation + " is not supported for execution!!");
+        }
+        throw new RuntimeException(connectionInformation + " type is not ok!?");
+
+
+
+
     }
 
     public static void closeConnections(String userId)

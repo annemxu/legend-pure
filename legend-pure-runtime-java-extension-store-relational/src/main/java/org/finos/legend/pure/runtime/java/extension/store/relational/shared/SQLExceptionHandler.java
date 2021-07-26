@@ -75,7 +75,7 @@ public final class SQLExceptionHandler
     public static String buildExceptionString(SQLException e, Connection connection)
     {
         StringBuilder builder = new StringBuilder(512);
-        builder.append("Error executing sql query");
+        builder.append("Errorqwerty executing sql query");
         builder.append("; SQL reason: ");
         builder.append(e.getMessage());
         builder.append("; SQL error code: ");

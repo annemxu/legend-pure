@@ -1,0 +1,86 @@
+
+import meta::relational::metamodel::*;
+import meta::json::*;
+import meta::json::tests::*;
+// import meta::relational::tests::*;
+import meta::relational::database::tests::*;
+
+import meta::pure::profiles::*;
+import meta::relational::metamodel::execute::*;
+import meta::pure::runtime::*;
+import meta::relational::runtime::*;
+
+
+###Relational
+Database meta::relational::database::tests::db
+(
+    Table interactionTable(ID INT PRIMARY KEY, sourceId INT, targetId INT, time INT, active VARCHAR(1))
+    Table tradeTable(ID INT PRIMARY KEY, prodId INT, accountID INT, quantity FLOAT, tradeDate DATE, settlementDateTime TIMESTAMP)
+    Table accountTable(ID INT PRIMARY KEY, name VARCHAR(200), createDate DATE)
+   
+)
+
+
+function meta::relational::database::tests::testRuntime():Runtime[1]
+{
+   testRuntime(db);
+}
+
+function meta::relational::database::tests::testRuntimeForBQ():Runtime[1]
+{
+   testRuntime(dbForBQ);
+}
+
+function meta::relational::database::tests::testRuntime(timeZone:String[1]):Runtime[1]
+{
+   testRuntime(testDatabaseConnection(db, $timeZone))
+}
+
+function meta::relational::database::tests::testRuntime(db:Database[1]):Runtime[1]
+{
+   testRuntime(testDatabaseConnection($db, []))
+}
+
+function <<access.private>> meta::relational::database::tests::testRuntime(testConnection:TestDatabaseConnection[1]):Runtime[1]
+{
+   ^Runtime(connections = $testConnection)
+}
+
+function <<access.private>> meta::relational::database::tests::testDatabaseConnection(db:Database[1], timeZone:String[0..1]):TestDatabaseConnection[1]
+{
+    ^TestDatabaseConnection(
+        element = $db,
+        type = DatabaseType.H2,
+        timeZone = if($timeZone->isEmpty(), |'GMT', |$timeZone)
+    );
+}
+
+ 
+function meta::relational::database::tests::createTableDatabaseTest():Boolean[1]
+{
+
+   print('Database testing');
+   let connection = testRuntime().connectionByElement(db)->cast(@TestDatabaseConnection);
+
+   executeInDb('Drop table if exists PersonNameParameter;', $connection);
+   executeInDb('Create Table PersonNameParameter(id INT, lastNameFirst VARCHAR(200), title VARCHAR(200));', $connection);
+   executeInDb('insert into PersonNameParameter (id, lastNameFirst, title) values (1, true, \'eee\');', $connection);
+
+   meta::relational::database::tests::createPersonTableandFillGeneral($connection);
+
+   true;
+}
+
+function meta::relational::database::tests::createPersonTableandFillGeneral(connection : DatabaseConnection[1]) : Boolean[1]
+{
+   executeInDb('Drop table if exists PersonTable;', $connection);
+   executeInDb('Create Table PersonTable(id INT, firstName VARCHAR(200), lastName VARCHAR(200), age INT, addressId INT, firmId INT, managerId INT);', $connection);
+   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (1, \'Peter\', \'Smith\',23, 1,1,2);', $connection);
+   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (2, \'John\', \'Johnson\',22, 2,1,4);', $connection);
+   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (3, \'John\', \'Hill\',12, 3,1,2);', $connection);
+   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (4, \'Anthony\', \'Allen\',22, 4,1,null);', $connection);
+   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (5, \'Fabrice\', \'Roberts\',34, 5,2,null);', $connection);
+   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (6, \'Oliver\', \'Hill\',32, 6,3,null);', $connection);
+   executeInDb('insert into PersonTable (id, firstName, lastName, age, addressId, firmId, managerId) values (7, \'David\', \'Harris\',35, 7,4,null);', $connection);
+   true;
+}

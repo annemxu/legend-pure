@@ -23,6 +23,7 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.finos.legend.pure.m3.compiler.Context;
 import org.finos.legend.pure.m3.exception.PureExecutionException;
+import org.finos.legend.pure.m3.exception.PureExecutionExceptionContinue;
 import org.finos.legend.pure.m3.navigation.Instance;
 import org.finos.legend.pure.m3.navigation.M3Paths;
 import org.finos.legend.pure.m3.navigation.M3Properties;
@@ -63,6 +64,8 @@ public class ExecuteInDb extends NativeFunction
 {
     private static final MutableIntObjectMap<String> sqlTypeToPureType;
     private static final IConnectionManagerHandler connectionManagerHandler = IConnectionManagerHandler.CONNECTION_MANAGER_HANDLER;
+
+
 
     static
     {
@@ -105,8 +108,11 @@ public class ExecuteInDb extends NativeFunction
     private final Message message;
     private int maxRows;
 
+
+//    qwerty
     public ExecuteInDb(ModelRepository repository, Message message, int maxRows)
     {
+
         this.repository = repository;
         this.message = message;
         this.maxRows = (maxRows < 0) ? 0 : maxRows;
@@ -115,6 +121,7 @@ public class ExecuteInDb extends NativeFunction
     @Override
     public CoreInstance execute(ListIterable<? extends CoreInstance> params, Stack<MutableMap<String, CoreInstance>> resolvedTypeParameters, Stack<MutableMap<String, CoreInstance>> resolvedMultiplicityParameters, VariableContext variableContext, CoreInstance functionExpressionToUseInStack, Profiler profiler, InstantiationContext instantiationContext, ExecutionSupport executionSupport, Context context, ProcessorSupport processorSupport) throws PureExecutionException
     {
+        System.out.println("Qwerty Execute in db");
 
         String sql = Instance.getValueForMetaPropertyToOneResolved(params.get(0), M3Properties.values, processorSupport).getName();
         CoreInstance connectionInformation = Instance.getValueForMetaPropertyToOneResolved(params.get(1), M3Properties.values, processorSupport);
@@ -154,6 +161,9 @@ public class ExecuteInDb extends NativeFunction
                 CoreInstance dbTimeZone = connectionInformation.getValueForMetaPropertyToOne("timeZone");
                 String tz = dbTimeZone == null ? "GMT" : dbTimeZone.getName();
 
+
+                System.out.println("Qwerty acquiring connection");
+
                 long startRequestConnection = System.nanoTime();
                 connectionWithDataSourceInfo = connectionManagerHandler.getConnectionWithDataSourceInfo(connectionInformation, processorSupport);
                 Instance.addValueToProperty(pureResult, "connectionAcquisitionTimeInNanoSecond", this.repository.newIntegerCoreInstance(System.nanoTime() - startRequestConnection), processorSupport);
@@ -179,10 +189,15 @@ public class ExecuteInDb extends NativeFunction
 
                 connectionManagerHandler.addPotentialDebug(connectionInformation, statement);
                 this.message.setMessage("Executing SQL...");
+
+                System.out.println("Qwerty executing sql");
                 long start = System.nanoTime();
                 if (statement.execute(sql))
                 {
                     String URL = connectionManagerHandler.getPotentialDebug(connectionInformation, connection);
+
+
+                    System.out.println("Qwerty: String URL contents :D");
                     if (URL != null)
                     {
                         Instance.addValueToProperty(pureResult, "executionPlanInformation", this.repository.newStringCoreInstance(URL), processorSupport);
@@ -232,6 +247,11 @@ public class ExecuteInDb extends NativeFunction
         }
         catch (SQLException e)
         {
+            System.out.println("Qwerty: There is a sql exception over here");
+            System.out.println(SQLExceptionHandler.buildExceptionString(e, connection));
+
+//            throw new PureExecutionExceptionContinue(functionExpressionToUseInStack.getSourceInformation(), SQLExceptionHandler.buildExceptionString(e, connection), e);
+
             throw new PureExecutionException(functionExpressionToUseInStack.getSourceInformation(), SQLExceptionHandler.buildExceptionString(e, connection), e);
         }
 

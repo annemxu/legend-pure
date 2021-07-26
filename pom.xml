@@ -119,7 +119,6 @@
         <guava.version>30.0-jre</guava.version>
         <h2.version>1.4.197</h2.version>
         <redshift.version>2.0.0.4</redshift.version>
-
     </properties>
 
 
@@ -895,6 +894,12 @@
 <!--                <artifactId>h2</artifactId>-->
 <!--                <version>${h2.version}</version>-->
 <!--            </dependency>-->
+
+            <dependency>
+                <groupId>com.amazon.redshift</groupId>
+                <artifactId>redshift-jdbc42</artifactId>
+                <version>${redshift.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>com.amazon.redshift</groupId>

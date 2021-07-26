@@ -1,0 +1,155 @@
+// Copyright 2021 Goldman Sachs
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+
+###Pure
+
+
+import meta::relational::metamodel::*;
+import meta::json::*;
+import meta::json::tests::*;
+import meta::relational::tests::*;
+import meta::pure::profiles::*;
+import meta::relational::metamodel::execute::*;
+import meta::pure::runtime::*;
+import meta::relational::runtime::*;
+
+import meta::pure::functions::asserts::*;
+import meta::relational::tests::databaseTestPattern::*;
+
+
+import meta::relational::mapping::*;
+import meta::relational::tests::model::simple::*;
+import  meta::relational::tests::mapping::embedded::advanced::model::*;
+import  meta::relational::tests::mapping::embedded::advanced::mapping::*;
+import meta::csv::*;
+import meta::relational::functions::asserts::*;
+
+function <<access.private>> meta::relational::tests::databaseTestPattern::getDatabases():DatabaseType[*]
+{
+   [DatabaseType.H2, DatabaseType.Redshift]; 
+}
+
+function <<test.Test>> meta::relational::tests::databaseTestPattern::testCreateDatabase():Boolean[1]
+{
+    (getDatabases() -> fold ({
+     currDatabaseType, nxtType |
+      let connection = ^TestDatabaseConnection(element = db, type = $currDatabaseType); 
+      executeInDb('Drop table if exists PersonNameParameter;', $connection);
+      executeInDb('Create Table PersonNameParameter(id INT, lastNameFirst VARCHAR(200), title VARCHAR(200));', $connection);
+      executeInDb('insert into PersonNameParameter (id, lastNameFirst, title) values (1, true, \'eee\');', $connection);
+   }, 0));
+  true; 
+}
+ 
+function <<test.Test>> meta::relational::tests::databaseTestPattern::testColumnNameOid():Any[1]
+{      
+    (getDatabases() -> fold ({
+    currDatabaseType, nxtType |
+    let connection = ^TestDatabaseConnection(element = db, type = $currDatabaseType); 
+    executeInDb('Drop table if exists TableColumnTest;', $connection);
+    executeInDb('Create Table TableColumnTest(oid INT);', $connection);
+    let res = executeInDb('select * from TableColumnTest', $connection);
+    let columnNames = $res.columnNames;
+    assertEquals('OID' , $columnNames);
+    }, 0));
+}
+
+function <<test.Test>> meta::relational::tests::databaseTestPattern::testColumnNameSystem():Any[1]
+{      
+    (getDatabases() -> fold ({
+    currDatabaseType, nxtType |
+    let connection = ^TestDatabaseConnection(element = db, type = $currDatabaseType); 
+    executeInDb('Drop table if exists TableColumnTest;', $connection);
+    executeInDb('Create Table TableColumnTest(system INT);', $connection);
+    let res = executeInDb('select * from TableColumnTest', $connection);
+    let columnNames = $res.columnNames;
+    assertEquals('SYSTEM' , $columnNames);
+    }, 0));
+}
+
+function <<test.Test>> meta::relational::tests::databaseTestPattern::testLowerCase():Any[1]
+{      
+    (getDatabases() -> fold ({
+    currDatabaseType, nxtType |
+    let connection = ^TestDatabaseConnection(element = db, type = $currDatabaseType); 
+    executeInDb('Drop table if exists TableColumnTest;', $connection);
+    executeInDb('Create Table TableColumnTest(lowercase INT);', $connection);
+    let res = executeInDb('select * from TableColumnTest', $connection);
+    let columnNames = $res.columnNames;
+    assertEquals('LOWERCASE' , $columnNames);
+    }, 0));
+}
+
+function <<test.Test>> meta::relational::tests::databaseTestPattern::concat():Any[1]
+{      
+    (getDatabases() -> fold ({
+    currDatabaseType, nxtType | 
+    let runtimeNew = ^Runtime(connections = ^TestDatabaseConnection(element = db, type = $currDatabaseType)); 
+    let result = execute(|Person.all()->map(p|$p.firstName+' '+$p.lastName), simpleRelationalMapping, $runtimeNew, meta::pure::router::extension::defaultRelationalExtensions());
+    assertSize($result.values, 7);
+    assertSameElements(['Anthony Allen', 'David Harris', 'Fabrice Roberts', 'John Johnson', 'John Hill', 'Oliver Hill', 'Peter Smith'], $result.values);
+    assertEquals('select concat("root".FIRSTNAME, \' \', "root".LASTNAME) from personTable as "root"', $result->sqlRemoveFormatting());
+    }, 0));
+}
+
+function <<test.Test>> meta::relational::tests::databaseTestPattern::testDayOfMonth():Any[1]
+{      
+   let result = execute(|Trade.all()->filter(d | $d.date->firstDayOfMonth() == %2017-02-01)->project(x | $x.date, 'date'), simpleRelationalMapping, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
+   assertEquals('select "root".tradeDate as "date" from tradeTable as "root" where dateadd(DAY, -(dayofmonth("root".tradeDate) - 1), "root".tradeDate) = \'2017-02-01\'', $result->sqlRemoveFormatting());
+
+}
+
+function <<test.Test>> meta::relational::tests::databaseTestPattern::testAdjustWithMicroseconds():Any[1]
+{      
+    (getDatabases() -> fold ({
+    currDatabaseType, nxtType | 
+    let runtimeNew = ^Runtime(connections = ^TestDatabaseConnection(element = db, type = $currDatabaseType)); 
+    
+    let result = execute(|Trade.all()->filter(d | ($d.settlementDateTime > %2014-12-04T15:22:23->adjust(123456, DurationUnit.MICROSECONDS)) && ($d.settlementDateTime < %2014-12-04T15:22:23->adjust(123457, DurationUnit.MICROSECONDS)))->project(x | $x.settlementDateTime, 'settlementDateTime'), simpleRelationalMapping, $runtimeNew, meta::pure::router::extension::defaultRelationalExtensions());
+   assertEquals('select "root".settlementDateTime as "settlementDateTime" from tradeTable as "root" where (("root".settlementDateTime is not null and "root".settlementDateTime > dateadd(MICROSECOND, 123456, \'2014-12-04 15:22:23\')) and ("root".settlementDateTime is not null and "root".settlementDateTime < dateadd(MICROSECOND, 123457, \'2014-12-04 15:22:23\')))', $result->sqlRemoveFormatting());
+   assertSize($result.values.rows, 1);
+   assertSameElements([%2014-12-04T15:22:23.123456789], $result.values.rows.values);
+    }, 0));
+}
+// function <<test.Test>> meta::relational::tests::databaseTestPattern::newFunctionSample():Any[1]
+// {      
+//     (getDatabases() -> fold ({
+//     currDatabaseType, nxtType | 
+//     let runtimeNew = ^Runtime(connections = ^TestDatabaseConnection(element = db, type = $currDatabaseType)); 
+//     }, 0));
+// }
+// function <<test.Test>> meta::relational::tests::databaseTestPattern::newFunctionSample():Any[1]
+// {      
+//     (getDatabases() -> fold ({
+//     currDatabaseType, nxtType | 
+//     let runtimeNew = ^Runtime(connections = ^TestDatabaseConnection(element = db, type = $currDatabaseType)); 
+//     }, 0));
+// }
+
+function <<test.Test>> meta::relational::tests::databaseTestPattern::currentNow():Any[1]
+{      
+ 
+ let result = execute(|Trade.all()->filter(t | $t.date->quarterNumber() == 4), simpleRelationalMapping, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
+   assertSameElements([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], $result.values.id->sort());
+   assertSameSQL('select "root".ID as "pk_0", "root".ID as "id", "root".quantity as "quantity", "root".tradeDate as "date", "root".settlementDateTime as "settlementDateTime", "tradeeventviewmaxtradeeventdate_0".maxTradeEventDate as "latestEventDate" from tradeTable as "root" left outer join (select "root".trade_id as trade_id, max("root".eventDate) as maxTradeEventDate from tradeEventTable as "root" group by "root".trade_id) as "tradeeventviewmaxtradeeventdate_0" on ("root".ID = "tradeeventviewmaxtradeeventdate_0".trade_id) where quarter("root".tradeDate) = 4', $result);
+   
+   let result2 = execute(|Trade.all()->filter(t | $t.date->quarterNumber() == 2), simpleRelationalMapping, testRuntime(), meta::pure::router::extension::defaultRelationalExtensions());
+   assertSameElements([], $result2.values.id->sort());
+ true; 
+
+}
+
+
+ 

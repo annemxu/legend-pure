@@ -1,0 +1,59 @@
+// Copyright 2021 Goldman Sachs
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import meta::relational::runtime::*;
+import meta::relational::tests::databaseCoreTests::*;
+
+function <<test.Test>> meta::relational::tests::databaseCoreTests::createTable::H2::createDatabase():Boolean[1]
+{
+  meta::relational::tests::databaseCoreTests::createTablesAndFillDb(DatabaseType.H2);
+  true; 
+}
+
+
+function <<test.Test>> meta::relational::tests::databaseCoreTests::columnNames::H2::testColumnNameOid():Boolean[1]
+{
+  meta::relational::tests::databaseCoreTests::testColumnNameOid(DatabaseType.H2);
+  true; 
+}
+
+function <<test.Test>> meta::relational::tests::databaseCoreTests::columnNames::H2::testColumnNameSystem():Boolean[1]
+{
+  meta::relational::tests::databaseCoreTests::testColumnNameSystem(DatabaseType.H2);
+  true; 
+}
+ 
+function <<test.Test>> meta::relational::tests::databaseCoreTests::columnNames::H2::testColumnNameLowercase():Boolean[1]
+{
+  meta::relational::tests::databaseCoreTests::testColumnNameLowercase(DatabaseType.H2);
+  true; 
+}
+
+function <<test.BeforePackage>> meta::relational::tests::databaseCoreTests::functionConcat::H2::setUp():Boolean[1]
+{
+   meta::relational::tests::databaseCoreTests::setUp(DatabaseType.H2);
+  true;
+}
+
+function <<test.Test>> meta::relational::tests::databaseCoreTests::functionConcat::H2::testConcatenationOfTdsQueries():Boolean[1]
+{
+  meta::relational::tests::databaseCoreTests::testConcatenationOfTdsQueries(DatabaseType.H2);
+  true; 
+}
+
+
+
+
+
+// function <<test.Test>> meta::relational::tests::database::testRoutingWithDbsIncluded(): Boolean[1]
